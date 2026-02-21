@@ -56,6 +56,7 @@ function HomeClient() {
     { id: 'hotTvShows', name: '热门剧集', enabled: true, order: 3 },
     { id: 'hotVarietyShows', name: '热门综艺', enabled: true, order: 4 },
     { id: 'upcomingContent', name: '即将上映', enabled: true, order: 5 },
+     { id: 'link', name: '网站联盟', enabled: true, order: 6 },
   ]);
   const [homeBannerEnabled, setHomeBannerEnabled] = useState(true);
   const [homeContinueWatchingEnabled, setHomeContinueWatchingEnabled] = useState(true);
@@ -573,6 +574,39 @@ function HomeClient() {
           </section>
         );
 
+
+        case 'link':
+        <div className="mx-auto items-center space-y-4 text-center">
+ <p>
+    Powered by 💝💝💝
+<a href="https://cloudflare.com/" rel="noopener noreferrer" target="_blank">赛博菩萨</a>；
+  <a href="https://github.com/" rel="noopener noreferrer" target="_blank">小黄人</a>；
+  <a href="https://www.cloudns.net/" rel="noopener noreferrer" target="_blank">CloudNS</a>；
+  <a href="https://account.proton.me/mail" rel="noopener noreferrer" target="_blank">Proton Mail</a>；💝💝💝
+</p>
+</div>
+
+
+<div className="mx-auto flex max-w-[64rem] flex-col items-center space-y-4 text-center">
+   <p>
+   🛠️🛠️🛠️网站联盟（自用）：
+    <a href="https://imgbed.19781126.xyz/" rel="noopener noreferrer" target="_blank">图床</a>；
+    <a href="https://paste.19781126.xyz/" rel="noopener noreferrer" target="_blank">网盘/WebDav</a>；
+     <a href="https://panhub.19781126.xyz/" rel="noopener noreferrer" target="_blank">网盘搜索</a>；
+    <a href="https://tv.19781126.xyz/" rel="noopener noreferrer" target="_blank">在线TV</a>；
+    <a href="https://www.19781126.xyz/" rel="noopener noreferrer" target="_blank">博客</a>；
+    <a href="https://media.19781126.xyz/" rel="noopener noreferrer" target="_blank">多媒体博客</a>；
+    <a href="https://github.19781126.xyz/" rel="noopener noreferrer" target="_blank">GH加速</a>；
+    <a href="https://comment.19781126.xyz/" rel="noopener noreferrer" target="_blank">评论</a>；
+    <a href="https://mail.19781126.xyz/" rel="noopener noreferrer" target="_blank">邮箱</a>；
+    <a href="https://epush.19781126.xyz/" rel="noopener noreferrer" target="_blank">消息推送</a>；🛠️🛠️🛠️
+ </p>
+ <hr />
+</div>          
+
+
+
+        
       default:
         return null;
     }
