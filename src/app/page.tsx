@@ -198,6 +198,7 @@ function HomeClient() {
     const bangumiCache = getCache('homepage_bangumi');
     const duanjuCache = getCache('homepage_duanju');
     const upcomingCache = getCache('homepage_upcoming');
+    const linkCache = getCache('homepage_link');
 
     if (moviesCache?.data) setHotMovies(moviesCache.data);
     if (tvShowsCache?.data) setHotTvShows(tvShowsCache.data);
@@ -207,12 +208,12 @@ function HomeClient() {
     if (upcomingCache?.data) setUpcomingContent(upcomingCache.data);
     if (linkCache?.data) setlink(linkCache.data);
 
-    const hasCache = moviesCache || tvShowsCache || varietyCache || bangumiCache || duanjuCache || upcomingCache;
+    const hasCache = moviesCache || tvShowsCache || varietyCache || bangumiCache || duanjuCache || upcomingCache|| linkCache;
     if (hasCache) setLoading(false);
 
     const needsRefresh = !moviesCache || moviesCache.expired || !tvShowsCache || tvShowsCache.expired ||
                          !varietyCache || varietyCache.expired || !bangumiCache || bangumiCache.expired ||
-                         !duanjuCache || duanjuCache.expired || !upcomingCache || upcomingCache.expired;
+                         !duanjuCache || duanjuCache.expired || !upcomingCache || upcomingCache.expired|| !linkCache || linkCache.expired;
 
     if (needsRefresh) {
       (async () => {
