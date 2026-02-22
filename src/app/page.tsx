@@ -578,9 +578,6 @@ function HomeClient() {
 
 
         case 'link':
-        if (linkContent.length === 0) return null;
-        return (
-          <section key="linkContent" className='mb-8'>
         <div className="mx-auto items-center space-y-4 text-center">
  <p>
     Powered by 💝💝💝
