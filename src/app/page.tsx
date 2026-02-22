@@ -56,7 +56,7 @@ function HomeClient() {
     { id: 'hotTvShows', name: '热门剧集', enabled: true, order: 3 },
     { id: 'hotVarietyShows', name: '热门综艺', enabled: true, order: 4 },
     { id: 'upcomingContent', name: '即将上映', enabled: true, order: 5 },
-     { id: 'link', name: '网站联盟', enabled: true, order: 6 },
+    { id: 'link', name: '网站联盟', enabled: true, order: 6 },
   ]);
   const [homeBannerEnabled, setHomeBannerEnabled] = useState(true);
   const [homeContinueWatchingEnabled, setHomeContinueWatchingEnabled] = useState(true);
@@ -205,6 +205,7 @@ function HomeClient() {
     if (bangumiCache?.data) setBangumiCalendarData(bangumiCache.data);
     if (duanjuCache?.data) setHotDuanju(duanjuCache.data);
     if (upcomingCache?.data) setUpcomingContent(upcomingCache.data);
+    if (linkCache?.data) setlink(linkCache.data);
 
     const hasCache = moviesCache || tvShowsCache || varietyCache || bangumiCache || duanjuCache || upcomingCache;
     if (hasCache) setLoading(false);
@@ -576,6 +577,9 @@ function HomeClient() {
 
 
         case 'link':
+        if (linkContent.length === 0) return null;
+        return (
+          <section key="linkContent" className='mb-8'>
         <div className="mx-auto items-center space-y-4 text-center">
  <p>
     Powered by 💝💝💝
