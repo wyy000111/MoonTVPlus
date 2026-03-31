@@ -42,6 +42,8 @@ export interface AdminConfig {
     CustomAdFilterVersion?: number; // 代码版本号（时间戳）
     // 注册相关配置
     EnableRegistration?: boolean; // 开启注册
+    RequireRegistrationInviteCode?: boolean; // 注册时要求邀请码
+    RegistrationInviteCode?: string; // 通用注册邀请码
     RegistrationRequireTurnstile?: boolean; // 注册启用Cloudflare Turnstile
     LoginRequireTurnstile?: boolean; // 登录启用Cloudflare Turnstile
     TurnstileSiteKey?: string; // Cloudflare Turnstile Site Key

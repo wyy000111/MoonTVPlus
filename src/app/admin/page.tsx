@@ -358,6 +358,8 @@ interface SiteConfig {
   MagnetAcgripReverseProxy?: string;
   EnableComments: boolean;
   EnableRegistration?: boolean;
+  RequireRegistrationInviteCode?: boolean;
+  RegistrationInviteCode?: string;
   RegistrationRequireTurnstile?: boolean;
   LoginRequireTurnstile?: boolean;
   TurnstileSiteKey?: string;
@@ -9054,6 +9056,8 @@ const RegistrationConfigComponent = ({
   const [showEnableRegistrationModal, setShowEnableRegistrationModal] = useState(false);
   const [registrationSettings, setRegistrationSettings] = useState<{
     EnableRegistration: boolean;
+    RequireRegistrationInviteCode: boolean;
+    RegistrationInviteCode: string;
     RegistrationRequireTurnstile: boolean;
     LoginRequireTurnstile: boolean;
     TurnstileSiteKey: string;
@@ -9071,6 +9075,8 @@ const RegistrationConfigComponent = ({
     OIDCMinTrustLevel: number;
   }>({
     EnableRegistration: false,
+    RequireRegistrationInviteCode: false,
+    RegistrationInviteCode: '',
     RegistrationRequireTurnstile: false,
     LoginRequireTurnstile: false,
     TurnstileSiteKey: '',
@@ -9092,6 +9098,8 @@ const RegistrationConfigComponent = ({
     if (config?.SiteConfig) {
       setRegistrationSettings({
         EnableRegistration: config.SiteConfig.EnableRegistration || false,
+        RequireRegistrationInviteCode: config.SiteConfig.RequireRegistrationInviteCode || false,
+        RegistrationInviteCode: config.SiteConfig.RegistrationInviteCode || '',
         RegistrationRequireTurnstile: config.SiteConfig.RegistrationRequireTurnstile || false,
         LoginRequireTurnstile: config.SiteConfig.LoginRequireTurnstile || false,
         TurnstileSiteKey: config.SiteConfig.TurnstileSiteKey || '',
@@ -9140,10 +9148,18 @@ const RegistrationConfigComponent = ({
           throw new Error('配置未加载');
         }
 
+        if (
+          registrationSettings.RequireRegistrationInviteCode &&
+          !registrationSettings.RegistrationInviteCode.trim()
+        ) {
+          throw new Error('已开启注册邀请码时，邀请码不能为空');
+        }
+
         // 合并站点配置和注册配置
         const updatedSiteConfig = {
           ...config.SiteConfig,
           ...registrationSettings,
+          RegistrationInviteCode: registrationSettings.RegistrationInviteCode.trim(),
         };
 
         const resp = await fetch('/api/admin/site', {
@@ -9182,205 +9198,269 @@ const RegistrationConfigComponent = ({
           注册配置
         </h3>
 
-        {/* 开启注册 */}
-        <div>
-          <div className='flex items-center justify-between'>
-            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-              开启注册
-            </label>
-            <button
-              type='button'
-              onClick={() => handleRegistrationToggle(!registrationSettings.EnableRegistration)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                registrationSettings.EnableRegistration
-                  ? buttonStyles.toggleOn
-                  : buttonStyles.toggleOff
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full ${
-                  buttonStyles.toggleThumb
-                } transition-transform ${
-                  registrationSettings.EnableRegistration
-                    ? buttonStyles.toggleThumbOn
-                    : buttonStyles.toggleThumbOff
-                }`}
-              />
-            </button>
+        <details open className='pt-4 border-t border-gray-200 dark:border-gray-700'>
+          <summary className='text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer'>
+            基础注册设置
+          </summary>
+          <div className='mt-4 space-y-4'>
+            <div>
+              <div className='flex items-center justify-between'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  开启注册
+                </label>
+                <button
+                  type='button'
+                  onClick={() => handleRegistrationToggle(!registrationSettings.EnableRegistration)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                    registrationSettings.EnableRegistration
+                      ? buttonStyles.toggleOn
+                      : buttonStyles.toggleOff
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full ${
+                      buttonStyles.toggleThumb
+                    } transition-transform ${
+                      registrationSettings.EnableRegistration
+                        ? buttonStyles.toggleThumbOn
+                        : buttonStyles.toggleThumbOff
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+                开启后登录页面将显示注册按钮，允许用户自行注册账号。
+              </p>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                默认用户组
+              </label>
+              <select
+                value={registrationSettings.DefaultUserTags && registrationSettings.DefaultUserTags.length > 0 ? registrationSettings.DefaultUserTags[0] : ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setRegistrationSettings((prev) => ({
+                    ...prev,
+                    DefaultUserTags: value ? [value] : [],
+                  }));
+                }}
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
+              >
+                <option value=''>无用户组（无限制）</option>
+                {config?.UserConfig?.Tags && config.UserConfig.Tags.map((tag) => (
+                  <option key={tag.name} value={tag.name}>
+                    {tag.name}
+                    {tag.enabledApis && tag.enabledApis.length > 0
+                      ? ` (${tag.enabledApis.length} 个源)`
+                      : ''}
+                  </option>
+                ))}
+              </select>
+              <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+                新注册的用户将自动分配到选中的用户组，选择"无用户组"为无限制
+              </p>
+            </div>
           </div>
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-            开启后登录页面将显示注册按钮，允许用户自行注册账号。
-          </p>
-        </div>
+        </details>
 
-        {/* 注册启用Cloudflare Turnstile */}
-        <div>
-          <div className='flex items-center justify-between'>
-            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-              注册启用Cloudflare Turnstile
-            </label>
-            <button
-              type='button'
-              disabled={!registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey}
-              onClick={() =>
-                setRegistrationSettings((prev) => ({
-                  ...prev,
-                  RegistrationRequireTurnstile: !prev.RegistrationRequireTurnstile,
-                }))
-              }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                !registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey
-                  ? 'opacity-50 cursor-not-allowed bg-gray-300 dark:bg-gray-600'
-                  : registrationSettings.RegistrationRequireTurnstile
-                  ? buttonStyles.toggleOn
-                  : buttonStyles.toggleOff
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full ${
-                  buttonStyles.toggleThumb
-                } transition-transform ${
-                  registrationSettings.RegistrationRequireTurnstile
-                    ? buttonStyles.toggleThumbOn
-                    : buttonStyles.toggleThumbOff
-                }`}
+        <details className='pt-4 border-t border-gray-200 dark:border-gray-700'>
+          <summary className='text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer'>
+            安全设置
+          </summary>
+          <div className='mt-4 space-y-4'>
+            <div>
+              <div className='flex items-center justify-between'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  要求注册邀请码
+                </label>
+                <button
+                  type='button'
+                  onClick={() =>
+                    setRegistrationSettings((prev) => ({
+                      ...prev,
+                      RequireRegistrationInviteCode: !prev.RequireRegistrationInviteCode,
+                    }))
+                  }
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                    registrationSettings.RequireRegistrationInviteCode
+                      ? buttonStyles.toggleOn
+                      : buttonStyles.toggleOff
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full ${
+                      buttonStyles.toggleThumb
+                    } transition-transform ${
+                      registrationSettings.RequireRegistrationInviteCode
+                        ? buttonStyles.toggleThumbOn
+                        : buttonStyles.toggleThumbOff
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+                开启后，普通注册必须填写管理员设置的统一邀请码。
+              </p>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                通用注册邀请码
+              </label>
+              <input
+                type='text'
+                placeholder='请输入通用注册邀请码'
+                value={registrationSettings.RegistrationInviteCode || ''}
+                onChange={(e) =>
+                  setRegistrationSettings((prev) => ({
+                    ...prev,
+                    RegistrationInviteCode: e.target.value,
+                  }))
+                }
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
               />
-            </button>
-          </div>
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-            开启后注册时需要通过Cloudflare Turnstile人机验证。
-            {(!registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey) && (
-              <span className='text-orange-500 dark:text-orange-400'> 需要先配置Site Key和Secret Key才能启用。</span>
-            )}
-          </p>
-        </div>
+              <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+                仅普通注册生效；开启邀请码注册时不能为空。
+              </p>
+            </div>
 
-        {/* 登录启用Cloudflare Turnstile */}
-        <div>
-          <div className='flex items-center justify-between'>
-            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-              登录启用Cloudflare Turnstile
-            </label>
-            <button
-              type='button'
-              disabled={!registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey}
-              onClick={() =>
-                setRegistrationSettings((prev) => ({
-                  ...prev,
-                  LoginRequireTurnstile: !prev.LoginRequireTurnstile,
-                }))
-              }
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                !registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey
-                  ? 'opacity-50 cursor-not-allowed bg-gray-300 dark:bg-gray-600'
-                  : registrationSettings.LoginRequireTurnstile
-                  ? buttonStyles.toggleOn
-                  : buttonStyles.toggleOff
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full ${
-                  buttonStyles.toggleThumb
-                } transition-transform ${
-                  registrationSettings.LoginRequireTurnstile
-                    ? buttonStyles.toggleThumbOn
-                    : buttonStyles.toggleThumbOff
-                }`}
+            <div>
+              <div className='flex items-center justify-between'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  注册启用Cloudflare Turnstile
+                </label>
+                <button
+                  type='button'
+                  disabled={!registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey}
+                  onClick={() =>
+                    setRegistrationSettings((prev) => ({
+                      ...prev,
+                      RegistrationRequireTurnstile: !prev.RegistrationRequireTurnstile,
+                    }))
+                  }
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                    !registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey
+                      ? 'opacity-50 cursor-not-allowed bg-gray-300 dark:bg-gray-600'
+                      : registrationSettings.RegistrationRequireTurnstile
+                        ? buttonStyles.toggleOn
+                        : buttonStyles.toggleOff
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full ${
+                      buttonStyles.toggleThumb
+                    } transition-transform ${
+                      registrationSettings.RegistrationRequireTurnstile
+                        ? buttonStyles.toggleThumbOn
+                        : buttonStyles.toggleThumbOff
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+                开启后注册时需要通过Cloudflare Turnstile人机验证。
+                {(!registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey) && (
+                  <span className='text-orange-500 dark:text-orange-400'> 需要先配置Site Key和Secret Key才能启用。</span>
+                )}
+              </p>
+            </div>
+
+            <div>
+              <div className='flex items-center justify-between'>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                  登录启用Cloudflare Turnstile
+                </label>
+                <button
+                  type='button'
+                  disabled={!registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey}
+                  onClick={() =>
+                    setRegistrationSettings((prev) => ({
+                      ...prev,
+                      LoginRequireTurnstile: !prev.LoginRequireTurnstile,
+                    }))
+                  }
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                    !registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey
+                      ? 'opacity-50 cursor-not-allowed bg-gray-300 dark:bg-gray-600'
+                      : registrationSettings.LoginRequireTurnstile
+                        ? buttonStyles.toggleOn
+                        : buttonStyles.toggleOff
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full ${
+                      buttonStyles.toggleThumb
+                    } transition-transform ${
+                      registrationSettings.LoginRequireTurnstile
+                        ? buttonStyles.toggleThumbOn
+                        : buttonStyles.toggleThumbOff
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+                开启后登录时需要通过Cloudflare Turnstile人机验证。
+                {(!registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey) && (
+                  <span className='text-orange-500 dark:text-orange-400'> 需要先配置Site Key和Secret Key才能启用。</span>
+                )}
+              </p>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                Cloudflare Turnstile Site Key
+              </label>
+              <input
+                type='text'
+                placeholder='请输入Cloudflare Turnstile Site Key'
+                value={registrationSettings.TurnstileSiteKey || ''}
+                onChange={(e) =>
+                  setRegistrationSettings((prev) => ({
+                    ...prev,
+                    TurnstileSiteKey: e.target.value,
+                  }))
+                }
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
               />
-            </button>
+              <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+                在Cloudflare Dashboard中获取的Site Key（公钥）
+              </p>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                Cloudflare Turnstile Secret Key
+              </label>
+              <input
+                type='password'
+                placeholder='请输入Cloudflare Turnstile Secret Key'
+                value={registrationSettings.TurnstileSecretKey || ''}
+                onChange={(e) =>
+                  setRegistrationSettings((prev) => ({
+                    ...prev,
+                    TurnstileSecretKey: e.target.value,
+                  }))
+                }
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
+              />
+              <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+                在Cloudflare Dashboard中获取的Secret Key（私钥），用于服务端验证
+              </p>
+            </div>
           </div>
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-            开启后登录时需要通过Cloudflare Turnstile人机验证。
-            {(!registrationSettings.TurnstileSiteKey || !registrationSettings.TurnstileSecretKey) && (
-              <span className='text-orange-500 dark:text-orange-400'> 需要先配置Site Key和Secret Key才能启用。</span>
-            )}
-          </p>
-        </div>
-
-        {/* Cloudflare Turnstile Site Key */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-            Cloudflare Turnstile Site Key
-          </label>
-          <input
-            type='text'
-            placeholder='请输入Cloudflare Turnstile Site Key'
-            value={registrationSettings.TurnstileSiteKey || ''}
-            onChange={(e) =>
-              setRegistrationSettings((prev) => ({
-                ...prev,
-                TurnstileSiteKey: e.target.value,
-              }))
-            }
-            className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
-          />
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-            在Cloudflare Dashboard中获取的Site Key（公钥）
-          </p>
-        </div>
-
-        {/* Cloudflare Turnstile Secret Key */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-            Cloudflare Turnstile Secret Key
-          </label>
-          <input
-            type='password'
-            placeholder='请输入Cloudflare Turnstile Secret Key'
-            value={registrationSettings.TurnstileSecretKey || ''}
-            onChange={(e) =>
-              setRegistrationSettings((prev) => ({
-                ...prev,
-                TurnstileSecretKey: e.target.value,
-              }))
-            }
-            className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
-          />
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-            在Cloudflare Dashboard中获取的Secret Key（私钥），用于服务端验证
-          </p>
-        </div>
-
-        {/* 默认用户组 */}
-        <div>
-          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
-            默认用户组
-          </label>
-          <select
-            value={registrationSettings.DefaultUserTags && registrationSettings.DefaultUserTags.length > 0 ? registrationSettings.DefaultUserTags[0] : ''}
-            onChange={(e) => {
-              const value = e.target.value;
-              setRegistrationSettings((prev) => ({
-                ...prev,
-                DefaultUserTags: value ? [value] : [],
-              }));
-            }}
-            className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
-          >
-            <option value=''>无用户组（无限制）</option>
-            {config?.UserConfig?.Tags && config.UserConfig.Tags.map((tag) => (
-              <option key={tag.name} value={tag.name}>
-                {tag.name}
-                {tag.enabledApis && tag.enabledApis.length > 0
-                  ? ` (${tag.enabledApis.length} 个源)`
-                  : ''}
-              </option>
-            ))}
-          </select>
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-            新注册的用户将自动分配到选中的用户组，选择"无用户组"为无限制
-          </p>
-        </div>
+        </details>
       </div>
 
       {/* OIDC配置 */}
-      <div className='space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700'>
-        <h3 className='text-sm font-semibold text-gray-900 dark:text-gray-100'>
+      <details className='pt-4 border-t border-gray-200 dark:border-gray-700'>
+        <summary className='text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer'>
           OIDC配置
-        </h3>
-
-        {/* 启用OIDC登录 */}
-        <div>
+        </summary>
+        <div className='mt-4 space-y-4'>
+          {/* 启用OIDC登录 */}
+          <div>
           <div className='flex items-center justify-between'>
             <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
               启用OIDC登录
@@ -9413,10 +9493,10 @@ const RegistrationConfigComponent = ({
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             开启后登录页面将显示OIDC登录按钮
           </p>
-        </div>
+          </div>
 
-        {/* 启用OIDC注册 */}
-        <div>
+          {/* 启用OIDC注册 */}
+          <div>
           <div className='flex items-center justify-between'>
             <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
               启用OIDC注册
@@ -9449,10 +9529,10 @@ const RegistrationConfigComponent = ({
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             开启后允许通过OIDC方式注册新用户（需要先启用OIDC登录）
           </p>
-        </div>
+          </div>
 
-        {/* OIDC Issuer */}
-        <div>
+          {/* OIDC Issuer */}
+          <div>
           <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             OIDC Issuer URL（可选）
           </label>
@@ -9514,10 +9594,10 @@ const RegistrationConfigComponent = ({
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             OIDC提供商的Issuer URL，填写后可点击"自动发现"按钮自动获取端点配置
           </p>
-        </div>
+          </div>
 
-        {/* Authorization Endpoint */}
-        <div>
+          {/* Authorization Endpoint */}
+          <div>
           <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             Authorization Endpoint（授权端点）
           </label>
@@ -9536,10 +9616,10 @@ const RegistrationConfigComponent = ({
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             用户授权的端点URL
           </p>
-        </div>
+          </div>
 
-        {/* Token Endpoint */}
-        <div>
+          {/* Token Endpoint */}
+          <div>
           <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             Token Endpoint（Token端点）
           </label>
@@ -9558,10 +9638,10 @@ const RegistrationConfigComponent = ({
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             交换授权码获取token的端点URL
           </p>
-        </div>
+          </div>
 
-        {/* UserInfo Endpoint */}
-        <div>
+          {/* UserInfo Endpoint */}
+          <div>
           <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             UserInfo Endpoint（用户信息端点）
           </label>
@@ -9580,10 +9660,10 @@ const RegistrationConfigComponent = ({
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             获取用户信息的端点URL
           </p>
-        </div>
+          </div>
 
-        {/* OIDC Client ID */}
-        <div>
+          {/* OIDC Client ID */}
+          <div>
           <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             OIDC Client ID
           </label>
@@ -9602,10 +9682,10 @@ const RegistrationConfigComponent = ({
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             在OIDC提供商处注册应用后获得的Client ID
           </p>
-        </div>
+          </div>
 
-        {/* OIDC Client Secret */}
-        <div>
+          {/* OIDC Client Secret */}
+          <div>
           <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             OIDC Client Secret
           </label>
@@ -9624,10 +9704,10 @@ const RegistrationConfigComponent = ({
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             在OIDC提供商处注册应用后获得的Client Secret
           </p>
-        </div>
+          </div>
 
-        {/* OIDC Redirect URI - 只读显示 */}
-        <div>
+          {/* OIDC Redirect URI - 只读显示 */}
+          <div>
           <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             OIDC Redirect URI（回调地址）
           </label>
@@ -9657,10 +9737,10 @@ const RegistrationConfigComponent = ({
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             这是系统自动生成的回调地址，基于环境变量SITE_BASE。请在OIDC提供商（如Keycloak、Auth0等）的应用配置中添加此地址作为允许的重定向URI
           </p>
-        </div>
+          </div>
 
-        {/* OIDC登录按钮文字 */}
-        <div>
+          {/* OIDC登录按钮文字 */}
+          <div>
           <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             OIDC登录按钮文字
           </label>
@@ -9679,10 +9759,10 @@ const RegistrationConfigComponent = ({
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             自定义OIDC登录按钮显示的文字,如"使用企业账号登录"、"使用SSO登录"等。留空则显示默认文字"使用OIDC登录"
           </p>
-        </div>
+          </div>
 
-        {/* OIDC最低信任等级 */}
-        <div>
+          {/* OIDC最低信任等级 */}
+          <div>
           <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             最低信任等级
           </label>
@@ -9700,11 +9780,12 @@ const RegistrationConfigComponent = ({
             }
             className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
           />
-          <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
-            仅LinuxDo网站有效。设置为0时不判断，1-4表示最低信任等级要求
-          </p>
+            <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
+              仅LinuxDo网站有效。设置为0时不判断，1-4表示最低信任等级要求
+            </p>
+          </div>
         </div>
-      </div>
+      </details>
 
       {/* 操作按钮 */}
       <div className='flex justify-end'>
