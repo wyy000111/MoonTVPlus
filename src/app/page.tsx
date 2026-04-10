@@ -378,6 +378,47 @@ function HomeClient() {
                     </div>
                   ))}
             </ScrollableRow>
+
+            <div className="mx-auto items-center space-y-4 text-center">
+  <div>
+      Powered by 💝💝💝
+      <a href="https://dash.cloudflare.com/" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">赛博菩萨</a>；
+      <a href="https://github.com/wyy000111" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">GitHub</a>；
+      <a href="https://www.cloudns.net/" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">CloudNS</a>；
+      <a href="https://account.proton.me/mail" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">Proton Mail</a>；
+      <a href="https://github.com/mtvpls/MoonTVPlus" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">MoonTVPlus</a>；
+      <a href="https://zh.wikipedia.org" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">维基百科</a>；
+💝💝💝
+  </div>
+  <p className="mx-auto items-center space-y-4 text-center">
+    🛠️🛠️🛠️ 网站联盟（自用）：
+    <a href="https://imgbed.19781126.xyz/" className="hover:text-blue-500" target="_blank">图床</a> |
+    <a href="https://paste.19781126.xyz/" className="hover:text-blue-500" target="_blank">网盘WebDav</a> |
+    <a href="https://panhub.19781126.xyz/" className="hover:text-blue-500" target="_blank">网盘搜索</a> |
+    <a href="https://danmu.19781126.xyz/" className="hover:text-blue-500" target="_blank">弹幕</a> |
+    <a href="https://tv.19781126.xyz/" className="hover:text-blue-500" target="_blank">在线TV</a> |
+    <a href="https://media.19781126.xyz/" className="hover:text-blue-500" target="_blank">多媒体博客</a> |
+    <a href="https://comment.19781126.xyz/" className="hover:text-blue-500" target="_blank">评论</a> |
+     <a href="https://vless.19781126.xyz/login" className="hover:text-blue-500" target="_blank">VPN</a> |
+    <a href="https://mail.19781126.xyz/" className="hover:text-blue-500" target="_blank">邮箱</a> |
+    <a href="https://chat.19781126.xyz/" className="hover:text-blue-500" target="_blank">AI Chat</a> |
+    <a href="https://gemini.19781126.xyz/" className="hover:text-blue-500" target="_blank">Gemini</a> |
+    <a href="https://www.19781126.xyz/" className="hover:text-blue-500" target="_blank">主站</a> |
+    <a href="https://epush.19781126.xyz/" className="hover:text-blue-500" target="_blank">ePush</a> 
+    🛠️🛠️🛠️
+  </p>
+</div>
+<div className="mx-auto max-w-4xl w-full mb-8">
+  <iframe
+    src="https://comment.19781126.xyz/embed/area/tv?theme=light&lang=zh-CN"
+    name="评论"
+    width="100%"
+    height="auto"
+    frameBorder="0"
+    scrolling="auto">
+  </iframe>
+</div>
+            
           </section>
         );
 
