@@ -909,7 +909,7 @@ function HomeClient() {
     scrolling="auto">
   </iframe>
 </div>
-<div style="display:flex;justify-content:center"><audio src="https://media-cdn.19781126.xyz/media-19781126-xyz/production/media/audio-88ab37ec049fd6960f3b115afb27b498.mp3" controls autoplay muted playsinline></audio></div>
+
           </section>
         );
 
