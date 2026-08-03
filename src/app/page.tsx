@@ -881,7 +881,8 @@ function HomeClient() {
  <a href="https://zh.wikipedia.org" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">维基百科</a>；
 💝💝💝
   </div>
-  <div className="flex flex-col items-center mx-auto text-center max-w-sm flex-wrap justify-center gap-x-3">
+  <div className="mx-auto max-w-4xl w-full mb-8">
+  <p className="text-sm leading-relaxed flex-wrap justify-center gap-x-3">
     🛠️🛠️🛠️ 网站联盟（自用）：
  <a href="https://imgbed.19781126.xyz/" className="hover:text-blue-500" target="_blank">图床</a> |
 <a href="https://webdav.19781126.xyz" className="hover:text-blue-500" target="_blank">网盘WebDav</a> |
@@ -896,6 +897,7 @@ function HomeClient() {
 <a href="https://www.19781126.xyz/" className="hover:text-blue-500" target="_blank">主站</a> |
 <a href="https://short.19781126.xyz/admin" className="hover:text-blue-500" target="_blank">短链</a> |
 <a href="https://epush.19781126.xyz/" className="hover:text-blue-500" target="_blank">ePush</a>🛠️🛠️🛠️
+  </p>
 </div>
 <div className="mx-auto max-w-4xl w-full mb-8">
   <iframe
