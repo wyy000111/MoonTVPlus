@@ -874,7 +874,7 @@ function HomeClient() {
 
       
 <div>
-<p className="mx-auto max-w-4xl w-full mb-8">     
+<p className="mx-auto max-w-4xl items-center w-full mb-8">     
       Powered by 💝💝💝
       <a href="https://dash.cloudflare.com/" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">赛博菩萨</a>；
       <a href="https://github.com/wyy000111" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">GitHub</a>；
