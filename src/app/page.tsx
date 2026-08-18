@@ -872,17 +872,35 @@ function HomeClient() {
               ))}
             </ScrollableRow>
 
-            
-<div className="mx-auto max-w-4xl w-full mb-8">
-<p className="text-sm leading-relaxed flex-wrap justify-center gap-x-3">
-      Powered by 💝💝💝
-      <a href="https://dash.cloudflare.com/" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">赛博菩萨</a>；
-      <a href="https://github.com/wyy000111" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">GitHub</a>；
-      <a href="https://account.proton.me/mail" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">Proton Mail</a>；
- <a href="https://zh.wikipedia.org" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">维基百科</a>；
-💝💝💝
-  </p>
+const footerLinks = [
+  { label: '赛博菩萨', href: 'https://dash.cloudflare.com/' },
+  { label: 'GitHub', href: 'https://github.com/wyy000111' },
+  { label: 'Proton Mail', href: 'https://account.proton.me/mail' },
+  { label: '维基百科', href: 'https://zh.wikipedia.org' },
+];
+
+// ...
+
+<footer className="mx-auto max-w-4xl w-full mb-8">
+  <div className="flex flex-wrap justify-center items-center gap-x-3 text-sm leading-relaxed">
+    <span>Powered by 💝💝💝</span>
+    {footerLinks.map((link) => (
+      <a
+        key={link.href}
+        href={link.href}
+        className="text-blue-500 hover:underline"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        {link.label}
+      </a>
+    ))}
+    <span>💝💝💝</span>
   </div>
+</footer>
+
+
+            
   <div className="mx-auto max-w-4xl w-full mb-8">
   <p className="text-sm leading-relaxed flex-wrap justify-center gap-x-3">
     🛠️🛠️🛠️ 网站联盟（自用）：
