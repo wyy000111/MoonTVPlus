@@ -873,8 +873,8 @@ function HomeClient() {
             </ScrollableRow>
 
             
-<div className="flex flex-col items-center mx-auto text-center max-w-sm flex-wrap justify-center gap-x-3">
-   <p className="text-sm leading-relaxed flex-wrap justify-center gap-x-3">
+<div className="mx-auto max-w-4xl w-full mb-8">
+<p className="text-sm leading-relaxed flex-wrap justify-center gap-x-3">
       Powered by 💝💝💝
       <a href="https://dash.cloudflare.com/" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">赛博菩萨</a>；
       <a href="https://github.com/wyy000111" className="text-blue-500 hover:underline" rel="noopener noreferrer" target="_blank">GitHub</a>；
